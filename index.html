@@ -6,7 +6,6 @@
     <title>Смены и подработки</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        /* ===== RESET & BASE ===== */
         * {
             margin: 0;
             padding: 0;
@@ -63,7 +62,7 @@
             padding: 12px 8px;
             border: none;
             border-radius: 12px;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 600;
             background: transparent;
             color: #888;
@@ -84,6 +83,8 @@
         .tab-content.active {
             display: block;
         }
+
+        /* Карточка смены */
         .task-card {
             background: white;
             border-radius: 16px;
@@ -115,6 +116,32 @@
             color: #999;
             margin-top: 4px;
         }
+        .task-card .status-badge {
+            display: inline-block;
+            padding: 2px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 6px;
+        }
+        .status-badge.pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+        .status-badge.accepted {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status-badge.rejected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .status-badge.cancelled {
+            background: #e2e3e5;
+            color: #383d41;
+        }
+
+        /* Кнопки */
         .respond-btn {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -132,14 +159,31 @@
             transform: scale(0.97);
         }
         .respond-btn:disabled {
-            background: #4caf50;
+            opacity: 0.6;
             cursor: default;
             transform: none;
-            box-shadow: none;
         }
         .respond-btn.employer-btn {
             background: #ff6b35;
         }
+        .respond-btn.accept-btn {
+            background: #28a745;
+        }
+        .respond-btn.reject-btn {
+            background: #dc3545;
+        }
+        .respond-btn.cancel-btn {
+            background: #6c757d;
+        }
+        .respond-btn.small {
+            padding: 8px 16px;
+            font-size: 13px;
+            width: auto;
+            margin: 4px 4px 0 0;
+            display: inline-block;
+        }
+
+        /* Форма */
         .form-group {
             margin-bottom: 14px;
         }
@@ -189,6 +233,8 @@
             opacity: 0.6;
             cursor: not-allowed;
         }
+
+        /* Мои карточки */
         .my-card {
             background: white;
             border-radius: 16px;
@@ -211,6 +257,13 @@
             border-top: 1px solid #f0f0f0;
             font-size: 14px;
         }
+        .my-card .actions {
+            margin-top: 8px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
         .empty {
             text-align: center;
             padding: 40px 20px;
@@ -229,9 +282,6 @@
             border: 1px solid #ffcdd2;
             font-size: 14px;
         }
-        .hidden {
-            display: none !important;
-        }
         .text-center {
             text-align: center;
         }
@@ -249,22 +299,25 @@
                 transform: rotate(360deg);
             }
         }
-        .badge {
-            background: #4caf50;
-            color: white;
-            padding: 2px 10px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
+        .flex {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
         }
-        .badge.orange {
-            background: #ff6b35;
+        .flex-1 {
+            flex: 1;
+        }
+        .mt-8 {
+            margin-top: 8px;
+        }
+        .hidden {
+            display: none !important;
         }
     </style>
 </head>
 <body>
 
-    <!-- ===== HEADER ===== -->
+    <!-- HEADER -->
     <div class="header">
         <div class="container" style="padding: 0;">
             <h1>📋 Смены</h1>
@@ -272,22 +325,19 @@
         </div>
     </div>
 
-    <!-- ===== ОСНОВНОЙ КОНТЕЙНЕР ===== -->
+    <!-- MAIN -->
     <div class="container">
 
-        <!-- СТАТУС -->
         <div id="status" class="status">⏳ Загрузка...</div>
 
-        <!-- ТАБЫ -->
+        <!-- Табы -->
         <div class="tabs" id="tabNav">
             <button class="tab-btn active" data-tab="list">📋 Смены</button>
             <button class="tab-btn" data-tab="add">➕ Разместить</button>
             <button class="tab-btn" data-tab="my">👤 Мои</button>
         </div>
 
-        <!-- ============================================ -->
-        <!-- ВКЛАДКА 1: СПИСОК СМЕН -->
-        <!-- ============================================ -->
+        <!-- Вкладка: Смены -->
         <div id="tab-list" class="tab-content active">
             <div id="tasks">
                 <div class="text-center" style="padding:30px;">
@@ -297,13 +347,10 @@
             </div>
         </div>
 
-        <!-- ============================================ -->
-        <!-- ВКЛАДКА 2: ДОБАВИТЬ СМЕНУ -->
-        <!-- ============================================ -->
+        <!-- Вкладка: Разместить -->
         <div id="tab-add" class="tab-content">
             <div style="background:white;padding:18px;border-radius:16px;box-shadow:0 2px 12px rgba(0,0,0,0.06);">
                 <h3 style="margin-bottom:16px;font-size:18px;">➕ Новая смена</h3>
-
                 <div class="form-group">
                     <label>Профессия / Название *</label>
                     <input id="f-title" placeholder="Водитель, Курьер..." />
@@ -324,15 +371,12 @@
                     <label>Оплата (₽)</label>
                     <input id="f-salary" type="number" placeholder="3000" />
                 </div>
-
                 <button class="submit-btn" id="submitBtn">✅ Разместить смену</button>
                 <div id="addStatus" style="margin-top:12px;font-size:14px;color:#888;"></div>
             </div>
         </div>
 
-        <!-- ============================================ -->
-        <!-- ВКЛАДКА 3: МОИ -->
-        <!-- ============================================ -->
+        <!-- Вкладка: Мои -->
         <div id="tab-my" class="tab-content">
             <div id="myTasks">
                 <div class="text-center" style="padding:30px;">
@@ -359,6 +403,7 @@
                     userId = String(tg.initDataUnsafe.user.id);
                 }
             }
+            console.log('👤 Пользователь:', userId);
 
             // ============================================================
             // 2. SUPABASE
@@ -397,7 +442,6 @@
             async function loadTasks() {
                 var container = document.getElementById('tasks');
                 var status = document.getElementById('status');
-
                 status.innerHTML = '⏳ Загрузка...';
 
                 try {
@@ -416,19 +460,24 @@
                         return;
                     }
 
-                    // Получаем отклики пользователя
-                    var responded = new Set();
+                    // Получаем отклики пользователя со статусами
+                    var myResponses = {};
                     try {
-                        var respResult = await supabase.from('responses').select('task_id').eq('user_id', userId);
+                        var respResult = await supabase.from('responses')
+                            .select('task_id, status')
+                            .eq('user_id', userId);
                         if (respResult.data) {
-                            respResult.data.forEach(function(r) { responded.add(r.task_id); });
+                            respResult.data.forEach(function(r) {
+                                myResponses[r.task_id] = r.status;
+                            });
                         }
                     } catch (_) {}
 
                     var html = '';
-                    data.forEach(function(task) {
-                        var isResponded = responded.has(task.id);
+                    for (var i = 0; i < data.length; i++) {
+                        var task = data[i];
                         var isMyTask = (task.created_by === userId);
+                        var myStatus = myResponses[task.id] || null;
 
                         var dateFormatted = task.date || 'Не указана';
                         if (task.date) {
@@ -439,13 +488,23 @@
                             } catch (_) {}
                         }
 
+                        // Кнопка в зависимости от статуса
                         var btnHtml = '';
                         if (isMyTask) {
                             btnHtml = '<button class="respond-btn employer-btn" disabled>📌 Моя смена</button>';
-                        } else if (isResponded) {
-                            btnHtml = '<button class="respond-btn" disabled>✅ Вы откликнулись</button>';
+                        } else if (myStatus === 'pending') {
+                            btnHtml = `
+                                <button class="respond-btn" disabled>⏳ Ожидает рассмотрения</button>
+                                <button class="respond-btn cancel-btn" data-id="${task.id}" data-action="cancel">Отменить отклик</button>
+                            `;
+                        } else if (myStatus === 'accepted') {
+                            btnHtml = '<button class="respond-btn" style="background:#28a745;" disabled>✅ Вы приняты!</button>';
+                        } else if (myStatus === 'rejected') {
+                            btnHtml = '<button class="respond-btn" style="background:#dc3545;" disabled>❌ Отклонено</button>';
+                        } else if (myStatus === 'cancelled') {
+                            btnHtml = '<button class="respond-btn" style="background:#6c757d;" disabled>🚫 Отменено вами</button>';
                         } else {
-                            btnHtml = '<button class="respond-btn" data-id="' + task.id + '">Откликнуться</button>';
+                            btnHtml = '<button class="respond-btn" data-id="' + task.id + '" data-action="respond">Откликнуться</button>';
                         }
 
                         html += '<div class="task-card">' +
@@ -458,61 +517,17 @@
                             '<div class="meta">' + (isMyTask ? '👤 Размещено вами' : '') + '</div>' +
                             btnHtml +
                             '</div>';
-                    });
+                    }
 
                     container.innerHTML = html;
 
                     // Обработчики кнопок
-                    document.querySelectorAll('.respond-btn:not([disabled])').forEach(function(btn) {
-                        btn.addEventListener('click', async function() {
-                            var taskId = this.dataset.id;
-                            var originalText = this.textContent;
-                            this.textContent = '⏳ Отправка...';
-                            this.disabled = true;
+                    document.querySelectorAll('.respond-btn[data-action="respond"]').forEach(function(btn) {
+                        btn.addEventListener('click', respondToTask);
+                    });
 
-                            try {
-                                // Проверяем, не откликался ли уже
-                                var check = await supabase.from('responses')
-                                    .select('*')
-                                    .eq('task_id', parseInt(taskId))
-                                    .eq('user_id', userId);
-
-                                if (check.data && check.data.length > 0) {
-                                    alert('Вы уже откликнулись на эту смену!');
-                                    this.textContent = '✅ Откликнулись';
-                                    this.style.background = '#4caf50';
-                                    this.disabled = true;
-                                    return;
-                                }
-
-                                var insResult = await supabase.from('responses').insert([{
-                                    task_id: parseInt(taskId),
-                                    user_id: userId,
-                                    responded_user_id: userId
-                                }]);
-
-                                if (insResult.error) {
-                                    alert('❌ ' + insResult.error.message);
-                                    this.textContent = originalText;
-                                    this.disabled = false;
-                                } else {
-                                    this.textContent = '✅ Откликнулись';
-                                    this.style.background = '#4caf50';
-                                    this.disabled = true;
-                                    if (window.Telegram && window.Telegram.WebApp) {
-                                        window.Telegram.WebApp.showAlert('✅ Вы откликнулись на смену!');
-                                    } else {
-                                        alert('✅ Вы откликнулись на смену!');
-                                    }
-                                    // Обновляем список
-                                    loadTasks();
-                                }
-                            } catch (err) {
-                                alert('❌ ' + err.message);
-                                this.textContent = originalText;
-                                this.disabled = false;
-                            }
-                        });
+                    document.querySelectorAll('.respond-btn[data-action="cancel"]').forEach(function(btn) {
+                        btn.addEventListener('click', cancelResponse);
                     });
 
                     status.innerHTML = '✅ Подключено. ' + data.length + ' смен';
@@ -524,7 +539,94 @@
             }
 
             // ============================================================
-            // 5. ДОБАВЛЕНИЕ СМЕНЫ
+            // 5. ОТКЛИКНУТЬСЯ
+            // ============================================================
+            async function respondToTask() {
+                var btn = this;
+                var taskId = btn.dataset.id;
+                var originalText = btn.textContent;
+
+                btn.textContent = '⏳ Отправка...';
+                btn.disabled = true;
+
+                try {
+                    // Проверяем, нет ли уже отклика
+                    var check = await supabase.from('responses')
+                        .select('*')
+                        .eq('task_id', parseInt(taskId))
+                        .eq('user_id', userId);
+
+                    if (check.data && check.data.length > 0) {
+                        alert('Вы уже откликались на эту смену!');
+                        btn.textContent = '✅ Уже откликнулись';
+                        btn.disabled = true;
+                        return;
+                    }
+
+                    var insResult = await supabase.from('responses').insert([{
+                        task_id: parseInt(taskId),
+                        user_id: userId,
+                        status: 'pending'
+                    }]);
+
+                    if (insResult.error) {
+                        alert('❌ ' + insResult.error.message);
+                        btn.textContent = originalText;
+                        btn.disabled = false;
+                    } else {
+                        btn.textContent = '⏳ Ожидает рассмотрения';
+                        btn.disabled = true;
+                        if (window.Telegram && window.Telegram.WebApp) {
+                            window.Telegram.WebApp.showAlert('✅ Вы откликнулись на смену! Ожидайте ответа.');
+                        } else {
+                            alert('✅ Отклик отправлен!');
+                        }
+                        loadTasks();
+                    }
+                } catch (err) {
+                    alert('❌ ' + err.message);
+                    btn.textContent = originalText;
+                    btn.disabled = false;
+                }
+            }
+
+            // ============================================================
+            // 6. ОТМЕНА ОТКЛИКА
+            // ============================================================
+            async function cancelResponse() {
+                var btn = this;
+                var taskId = btn.dataset.id;
+
+                if (!confirm('❓ Отменить отклик на эту смену?')) return;
+
+                btn.textContent = '⏳ Отмена...';
+                btn.disabled = true;
+
+                try {
+                    var result = await supabase.from('responses')
+                        .update({ status: 'cancelled' })
+                        .eq('task_id', parseInt(taskId))
+                        .eq('user_id', userId);
+
+                    if (result.error) {
+                        alert('❌ ' + result.error.message);
+                    } else {
+                        if (window.Telegram && window.Telegram.WebApp) {
+                            window.Telegram.WebApp.showAlert('✅ Отклик отменён');
+                        } else {
+                            alert('✅ Отклик отменён');
+                        }
+                        loadTasks();
+                    }
+                } catch (err) {
+                    alert('❌ ' + err.message);
+                }
+                btn.textContent = 'Отменить отклик';
+                btn.disabled = false;
+            }
+
+            // ============================================================
+            // 7. ДОБАВЛЕНИЕ СМЕНЫ
             // ============================================================
             document.getElementById('submitBtn').addEventListener('click', async function() {
                 var title = document.getElementById('f-title').value.trim();
@@ -577,26 +679,26 @@
             });
 
             // ============================================================
-            // 6. МОИ ОТКЛИКИ И МОИ СМЕНЫ
+            // 8. МОИ: ОТКЛИКИ + МОИ СМЕНЫ (с управлением)
             // ============================================================
             async function loadMyTasks() {
                 var container = document.getElementById('myTasks');
 
                 try {
-                    // 1. Смены, на которые откликнулся пользователь
-                    var respResult = await supabase.from('responses').select('task_id').eq('user_id', userId);
-                    var respondedTaskIds = respResult.data ? respResult.data.map(function(r) { return r.task_id; }) :
-                    [];
-
-                    // 2. Смены, созданные пользователем
+                    // 1. Мои смены (как работодатель)
                     var myTasksResult = await supabase.from('tasks').select('*').eq('created_by', userId);
-
                     var myTasks = myTasksResult.data || [];
 
-                    // 3. Получаем данные по откликнутым сменам
+                    // 2. Мои отклики (как работник)
+                    var respResult = await supabase.from('responses')
+                        .select('task_id, status')
+                        .eq('user_id', userId);
+                    var myResponseIds = respResult.data || [];
+
                     var respondedTasks = [];
-                    if (respondedTaskIds.length > 0) {
-                        var tasksResult = await supabase.from('tasks').select('*').in('id', respondedTaskIds);
+                    if (myResponseIds.length > 0) {
+                        var taskIds = myResponseIds.map(function(r) { return r.task_id; });
+                        var tasksResult = await supabase.from('tasks').select('*').in('id', taskIds);
                         respondedTasks = tasksResult.data || [];
                     }
 
@@ -607,11 +709,18 @@
 
                     var html = '';
 
-                    // Мои размещённые смены
+                    // ===== МОИ СМЕНЫ (работодатель) =====
                     if (myTasks.length > 0) {
                         html += '<h4 style="margin:12px 0 8px;color:#ff6b35;">📌 Мои смены</h4>';
                         for (var i = 0; i < myTasks.length; i++) {
                             var task = myTasks[i];
+
+                            // Получаем отклики на эту смену
+                            var respForTask = await supabase.from('responses')
+                                .select('id, user_id, status')
+                                .eq('task_id', task.id);
+                            var applicants = respForTask.data || [];
+
                             var dateFormatted = task.date || 'Не указана';
                             if (task.date) {
                                 try {
@@ -621,34 +730,61 @@
                                 } catch (_) {}
                             }
 
-                            // Кто откликнулся на эту смену
-                            var respondents = [];
-                            try {
-                                var respRes = await supabase.from('responses').select('user_id').eq('task_id', task
-                                    .id);
-                                if (respRes.data) {
-                                    respondents = respRes.data.map(function(r) { return r.user_id; });
-                                }
-                            } catch (_) {}
-
                             html += '<div class="my-card" style="border-left-color:#ff6b35;">' +
                                 '<div class="title">' + (task.description || task.title || 'Без названия') +
                                 '</div>' +
                                 '<div class="sub">📍 ' + (task.location || task.place || 'Не указано') + '</div>' +
                                 '<div class="sub">📅 ' + dateFormatted + '</div>' +
                                 '<div class="sub">💰 ' + (task.salary ? task.salary + ' ₽' : 'Не указана') +
-                                '</div>' +
-                                '<div class="respondents">👥 Откликнулось: ' + (respondents.length > 0 ? respondents
-                                    .join(', ') : 'никого') + '</div>' +
                                 '</div>';
+
+                            // Список откликнувшихся
+                            if (applicants.length > 0) {
+                                html += '<div class="respondents"><strong>👥 Отклики:</strong>';
+                                for (var a = 0; a < applicants.length; a++) {
+                                    var app = applicants[a];
+                                    var statusText = {
+                                        'pending': '⏳ Ожидает',
+                                        'accepted': '✅ Принят',
+                                        'rejected': '❌ Отклонён',
+                                        'cancelled': '🚫 Отменён'
+                                    } [app.status] || app.status;
+
+                                    html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid #f5f5f5;">' +
+                                        '<span>👤 ' + app.user_id + ' — ' + statusText + '</span>';
+
+                                    // Кнопки для работодателя (только если статус pending)
+                                    if (app.status === 'pending') {
+                                        html += '<span>' +
+                                            '<button class="respond-btn small accept-btn" data-response-id="' + app
+                                            .id + '" data-action="accept">✅ Принять</button> ' +
+                                            '<button class="respond-btn small reject-btn" data-response-id="' + app
+                                            .id + '" data-action="reject">❌ Отклонить</button>' +
+                                            '</span>';
+                                    }
+                                    html += '</div>';
+                                }
+                                html += '</div>';
+                            } else {
+                                html += '<div class="respondents" style="color:#999;">Пока никто не откликнулся</div>';
+                            }
+
+                            html += '</div>';
                         }
                     }
 
-                    // Мои отклики
+                    // ===== МОИ ОТКЛИКИ (работник) =====
                     if (respondedTasks.length > 0) {
                         html += '<h4 style="margin:12px 0 8px;color:#4caf50;">✅ Мои отклики</h4>';
                         for (var j = 0; j < respondedTasks.length; j++) {
                             var t = respondedTasks[j];
+                            var statusText = {
+                                'pending': '⏳ Ожидает рассмотрения',
+                                'accepted': '✅ Принято!',
+                                'rejected': '❌ Отклонено',
+                                'cancelled': '🚫 Отменено вами'
+                            } [myResponseIds[j]?.status] || '⏳ Ожидает';
+
                             var dateFormatted2 = t.date || 'Не указана';
                             if (t.date) {
                                 try {
@@ -657,6 +793,7 @@
                                         year: 'numeric' });
                                 } catch (_) {}
                             }
+
                             html += '<div class="my-card">' +
                                 '<div class="title">' + (t.description || t.title || 'Без названия') +
                                 '</div>' +
@@ -664,11 +801,39 @@
                                 '<div class="sub">📅 ' + dateFormatted2 + '</div>' +
                                 '<div class="sub">💰 ' + (t.salary ? t.salary + ' ₽' : 'Не указана') +
                                 '</div>' +
-                                '</div>';
+                                '<div><span class="status-badge ' + (myResponseIds[j]?.status || 'pending') +
+                                '">' + statusText + '</span></div>';
+
+                            // Если статус pending — можно отменить
+                            if (myResponseIds[j]?.status === 'pending') {
+                                html += '<button class="respond-btn cancel-btn small" data-task-id="' + t.id +
+                                    '" style="margin-top:8px;">🚫 Отменить отклик</button>';
+                            }
+                            html += '</div>';
                         }
                     }
 
                     container.innerHTML = html;
+
+                    // ===== ОБРАБОТЧИКИ =====
+                    // Принять/отклонить отклик (работодатель)
+                    document.querySelectorAll('[data-action="accept"]').forEach(function(btn) {
+                        btn.addEventListener('click', function() {
+                            handleEmployerResponse(this.dataset.responseId, 'accepted');
+                        });
+                    });
+                    document.querySelectorAll('[data-action="reject"]').forEach(function(btn) {
+                        btn.addEventListener('click', function() {
+                            handleEmployerResponse(this.dataset.responseId, 'rejected');
+                        });
+                    });
+
+                    // Отменить отклик (работник)
+                    document.querySelectorAll('[data-task-id]').forEach(function(btn) {
+                        btn.addEventListener('click', function() {
+                            cancelResponseFromMy(this.dataset.taskId);
+                        });
+                    });
 
                 } catch (err) {
                     container.innerHTML = '<div class="error">❌ ' + err.message + '</div>';
@@ -676,11 +841,51 @@
             }
 
             // ============================================================
-            // 7. ЗАПУСК
+            // 9. ОТВЕТ РАБОТОДАТЕЛЯ (принять/отклонить)
             // ============================================================
-            loadTasks();
-        })();
-    </script>
+            async function handleEmployerResponse(responseId, status) {
+                if (!confirm('Подтвердите действие: ' + (status === 'accepted' ? 'ПРИНЯТЬ' : 'ОТКЛОНИТЬ') + ' работника?'))
+                    return;
 
-</body>
-</html>
+                try {
+                    var result = await supabase.from('responses')
+                        .update({
+                            status: status,
+                            employer_response: status,
+                            responded_at: new Date().toISOString()
+                        })
+                        .eq('id', parseInt(responseId));
+
+                    if (result.error) {
+                        alert('❌ ' + result.error.message);
+                    } else {
+                        if (window.Telegram && window.Telegram.WebApp) {
+                            window.Telegram.WebApp.showAlert('✅ Отклик ' + (status === 'accepted' ? 'принят' :
+                                'отклонён'));
+                        } else {
+                            alert('✅ Отклик ' + (status === 'accepted' ? 'принят' : 'отклонён'));
+                        }
+                        loadMyTasks();
+                        loadTasks();
+                    }
+                } catch (err) {
+                    alert('❌ ' + err.message);
+                }
+            }
+
+            // ============================================================
+            // 10. ОТМЕНА ОТКЛИКА (из вкладки Мои)
+            // ============================================================
+            async function cancelResponseFromMy(taskId) {
+                if (!confirm('❓ Отменить отклик на эту смену?')) return;
+
+                try {
+                    var result = await supabase.from('responses')
+                        .update({ status: 'cancelled' })
+                        .eq('task_id', parseInt(taskId))
+                        .eq('user_id', userId);
+
+                    if (result.error) {
+                        alert('❌ ' + result.error.message);
+                    } else {
+                        if (window.Telegram && window
