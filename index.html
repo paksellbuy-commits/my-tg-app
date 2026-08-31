@@ -888,4 +888,25 @@
                     if (result.error) {
                         alert('❌ ' + result.error.message);
                     } else {
-                        if (window.Telegram && window
+                        if (window.Telegram && window.Telegram.WebApp) {
+                            window.Telegram.WebApp.showAlert('✅ Отклик отменён');
+                        } else {
+                            alert('✅ Отклик отменён');
+                        }
+                        loadMyTasks();
+                        loadTasks();
+                    }
+                } catch (err) {
+                    alert('❌ ' + err.message);
+                }
+            }
+
+            // ============================================================
+            // 11. ЗАПУСК
+            // ============================================================
+            loadTasks();
+        })();
+    </script>
+
+</body>
+</html>
