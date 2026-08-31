@@ -12,15 +12,12 @@
             padding: 0;
             box-sizing: border-box;
         }
-
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: #f0f2f5;
             color: #1a1a2e;
             padding-bottom: 80px;
         }
-
-        /* ===== HEADER ===== */
         .header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -38,14 +35,11 @@
             font-size: 13px;
             opacity: 0.85;
         }
-
         .container {
             max-width: 480px;
             margin: 0 auto;
             padding: 12px 16px 16px;
         }
-
-        /* ===== СТАТУС ===== */
         .status {
             background: white;
             padding: 10px 14px;
@@ -55,8 +49,6 @@
             color: #555;
             box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
         }
-
-        /* ===== НАВИГАЦИЯ (ТАБЫ) ===== */
         .tabs {
             display: flex;
             gap: 8px;
@@ -71,7 +63,7 @@
             padding: 12px 8px;
             border: none;
             border-radius: 12px;
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 600;
             background: transparent;
             color: #888;
@@ -86,16 +78,12 @@
         .tab-btn:active {
             transform: scale(0.96);
         }
-
-        /* ===== КОНТЕНТ ВКЛАДОК ===== */
         .tab-content {
             display: none;
         }
         .tab-content.active {
             display: block;
         }
-
-        /* ===== КАРТОЧКА СМЕНЫ ===== */
         .task-card {
             background: white;
             border-radius: 16px;
@@ -122,7 +110,11 @@
             padding-top: 8px;
             border-top: 1px solid #f0f0f0;
         }
-
+        .task-card .meta {
+            font-size: 12px;
+            color: #999;
+            margin-top: 4px;
+        }
         .respond-btn {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -145,8 +137,9 @@
             transform: none;
             box-shadow: none;
         }
-
-        /* ===== ФОРМА ДОБАВЛЕНИЯ ===== */
+        .respond-btn.employer-btn {
+            background: #ff6b35;
+        }
         .form-group {
             margin-bottom: 14px;
         }
@@ -177,7 +170,6 @@
             resize: vertical;
             min-height: 60px;
         }
-
         .submit-btn {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -197,8 +189,6 @@
             opacity: 0.6;
             cursor: not-allowed;
         }
-
-        /* ===== МОИ ОТКЛИКИ ===== */
         .my-card {
             background: white;
             border-radius: 16px;
@@ -215,7 +205,12 @@
             font-size: 13px;
             color: #888;
         }
-
+        .my-card .respondents {
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid #f0f0f0;
+            font-size: 14px;
+        }
         .empty {
             text-align: center;
             padding: 40px 20px;
@@ -226,7 +221,6 @@
             font-size: 40px;
             margin-bottom: 10px;
         }
-
         .error {
             background: #fff5f5;
             color: #c62828;
@@ -235,28 +229,12 @@
             border: 1px solid #ffcdd2;
             font-size: 14px;
         }
-
-        /* ===== ОБЩИЕ ПОМОЩНИКИ ===== */
         .hidden {
             display: none !important;
-        }
-        .mt-8 {
-            margin-top: 8px;
         }
         .text-center {
             text-align: center;
         }
-        .gap-8 {
-            gap: 8px;
-        }
-        .flex {
-            display: flex;
-        }
-        .flex-1 {
-            flex: 1;
-        }
-
-        /* ===== АНИМАЦИЯ ЗАГРУЗКИ ===== */
         .spinner {
             display: inline-block;
             width: 24px;
@@ -270,6 +248,17 @@
             to {
                 transform: rotate(360deg);
             }
+        }
+        .badge {
+            background: #4caf50;
+            color: white;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .badge.orange {
+            background: #ff6b35;
         }
     </style>
 </head>
@@ -342,7 +331,7 @@
         </div>
 
         <!-- ============================================ -->
-        <!-- ВКЛАДКА 3: МОИ ОТКЛИКИ -->
+        <!-- ВКЛАДКА 3: МОИ -->
         <!-- ============================================ -->
         <div id="tab-my" class="tab-content">
             <div id="myTasks">
@@ -372,14 +361,14 @@
             }
 
             // ============================================================
-            // 2. SUPABASE — ТВОИ ДАННЫЕ (проверь!)
+            // 2. SUPABASE
             // ============================================================
             var supabaseUrl = 'https://azxfbrmrnhckfbhghjqr.supabase.co';
             var supabaseKey = 'sb_publishable_WmfbkKQCW0ioUJA33Dgt0w_D6IJ5CQg';
             var supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
             // ============================================================
-            // 3. РАБОТА С ВКЛАДКАМИ
+            // 3. ВКЛАДКИ
             // ============================================================
             var tabButtons = document.querySelectorAll('.tab-btn');
             var tabContents = {
@@ -390,17 +379,12 @@
 
             tabButtons.forEach(function(btn) {
                 btn.addEventListener('click', function() {
-                    // Убираем активный класс у всех кнопок
                     tabButtons.forEach(function(b) { b.classList.remove('active'); });
                     this.classList.add('active');
-
-                    // Показываем нужную вкладку
                     var tabName = this.dataset.tab;
                     for (var key in tabContents) {
                         tabContents[key].classList.toggle('active', key === tabName);
                     }
-
-                    // Перезагружаем данные при переключении на «Мои»
                     if (tabName === 'my') {
                         loadMyTasks();
                     }
@@ -444,6 +428,7 @@
                     var html = '';
                     data.forEach(function(task) {
                         var isResponded = responded.has(task.id);
+                        var isMyTask = (task.created_by === userId);
 
                         var dateFormatted = task.date || 'Не указана';
                         if (task.date) {
@@ -454,6 +439,15 @@
                             } catch (_) {}
                         }
 
+                        var btnHtml = '';
+                        if (isMyTask) {
+                            btnHtml = '<button class="respond-btn employer-btn" disabled>📌 Моя смена</button>';
+                        } else if (isResponded) {
+                            btnHtml = '<button class="respond-btn" disabled>✅ Вы откликнулись</button>';
+                        } else {
+                            btnHtml = '<button class="respond-btn" data-id="' + task.id + '">Откликнуться</button>';
+                        }
+
                         html += '<div class="task-card">' +
                             '<div class="task-title">' + (task.description || task.title || 'Без названия') +
                             '</div>' +
@@ -461,10 +455,8 @@
                             '<div class="info">📅 ' + dateFormatted + '</div>' +
                             '<div class="info">⏰ ' + (task.time || 'Не указано') + '</div>' +
                             '<div class="salary">' + (task.salary ? task.salary + ' ₽' : 'Не указана') + '</div>' +
-                            '<button class="respond-btn" data-id="' + task.id + '"' + (isResponded ? ' disabled' :
-                                '') + '>' +
-                            (isResponded ? '✅ Откликнулись' : 'Откликнуться') +
-                            '</button>' +
+                            '<div class="meta">' + (isMyTask ? '👤 Размещено вами' : '') + '</div>' +
+                            btnHtml +
                             '</div>';
                     });
 
@@ -479,8 +471,26 @@
                             this.disabled = true;
 
                             try {
-                                var insResult = await supabase.from('responses').insert([{ task_id: parseInt(
-                                        taskId), user_id: userId }]);
+                                // Проверяем, не откликался ли уже
+                                var check = await supabase.from('responses')
+                                    .select('*')
+                                    .eq('task_id', parseInt(taskId))
+                                    .eq('user_id', userId);
+
+                                if (check.data && check.data.length > 0) {
+                                    alert('Вы уже откликнулись на эту смену!');
+                                    this.textContent = '✅ Откликнулись';
+                                    this.style.background = '#4caf50';
+                                    this.disabled = true;
+                                    return;
+                                }
+
+                                var insResult = await supabase.from('responses').insert([{
+                                    task_id: parseInt(taskId),
+                                    user_id: userId,
+                                    responded_user_id: userId
+                                }]);
+
                                 if (insResult.error) {
                                     alert('❌ ' + insResult.error.message);
                                     this.textContent = originalText;
@@ -488,11 +498,14 @@
                                 } else {
                                     this.textContent = '✅ Откликнулись';
                                     this.style.background = '#4caf50';
+                                    this.disabled = true;
                                     if (window.Telegram && window.Telegram.WebApp) {
                                         window.Telegram.WebApp.showAlert('✅ Вы откликнулись на смену!');
                                     } else {
                                         alert('✅ Вы откликнулись на смену!');
                                     }
+                                    // Обновляем список
+                                    loadTasks();
                                 }
                             } catch (err) {
                                 alert('❌ ' + err.message);
@@ -550,11 +563,8 @@
                         } else {
                             alert('✅ Смена добавлена!');
                         }
-                        // Очищаем форму
                         document.querySelectorAll('#tab-add input').forEach(function(i) { i.value = ''; });
-                        // Перезагружаем список
                         loadTasks();
-                        // Переключаемся на вкладку «Смены»
                         document.querySelector('.tab-btn[data-tab="list"]').click();
                     }
                 } catch (err) {
@@ -567,60 +577,96 @@
             });
 
             // ============================================================
-            // 6. МОИ ОТКЛИКИ
+            // 6. МОИ ОТКЛИКИ И МОИ СМЕНЫ
             // ============================================================
             async function loadMyTasks() {
                 var container = document.getElementById('myTasks');
 
                 try {
-                    // Получаем ID задач, на которые откликнулся пользователь
+                    // 1. Смены, на которые откликнулся пользователь
                     var respResult = await supabase.from('responses').select('task_id').eq('user_id', userId);
+                    var respondedTaskIds = respResult.data ? respResult.data.map(function(r) { return r.task_id; }) :
+                    [];
 
-                    if (respResult.error) {
-                        container.innerHTML = '<div class="error">❌ ' + respResult.error.message + '</div>';
-                        return;
+                    // 2. Смены, созданные пользователем
+                    var myTasksResult = await supabase.from('tasks').select('*').eq('created_by', userId);
+
+                    var myTasks = myTasksResult.data || [];
+
+                    // 3. Получаем данные по откликнутым сменам
+                    var respondedTasks = [];
+                    if (respondedTaskIds.length > 0) {
+                        var tasksResult = await supabase.from('tasks').select('*').in('id', respondedTaskIds);
+                        respondedTasks = tasksResult.data || [];
                     }
 
-                    var taskIds = respResult.data.map(function(r) { return r.task_id; });
-
-                    if (taskIds.length === 0) {
-                        container.innerHTML = '<div class="empty"><div class="big-icon">📭</div>Вы ещё не откликались на смены</div>';
-                        return;
-                    }
-
-                    // Получаем сами задачи
-                    var tasksResult = await supabase.from('tasks').select('*').in('id', taskIds);
-
-                    if (tasksResult.error) {
-                        container.innerHTML = '<div class="error">❌ ' + tasksResult.error.message + '</div>';
-                        return;
-                    }
-
-                    var data = tasksResult.data;
-                    if (!data || data.length === 0) {
-                        container.innerHTML = '<div class="empty">📭 Нет данных</div>';
+                    if (myTasks.length === 0 && respondedTasks.length === 0) {
+                        container.innerHTML = '<div class="empty"><div class="big-icon">📭</div>У вас пока нет активности</div>';
                         return;
                     }
 
                     var html = '';
-                    data.forEach(function(task) {
-                        var dateFormatted = task.date || 'Не указана';
-                        if (task.date) {
+
+                    // Мои размещённые смены
+                    if (myTasks.length > 0) {
+                        html += '<h4 style="margin:12px 0 8px;color:#ff6b35;">📌 Мои смены</h4>';
+                        for (var i = 0; i < myTasks.length; i++) {
+                            var task = myTasks[i];
+                            var dateFormatted = task.date || 'Не указана';
+                            if (task.date) {
+                                try {
+                                    var d = new Date(task.date);
+                                    dateFormatted = d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long',
+                                        year: 'numeric' });
+                                } catch (_) {}
+                            }
+
+                            // Кто откликнулся на эту смену
+                            var respondents = [];
                             try {
-                                var d = new Date(task.date);
-                                dateFormatted = d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long',
-                                    year: 'numeric' });
+                                var respRes = await supabase.from('responses').select('user_id').eq('task_id', task
+                                    .id);
+                                if (respRes.data) {
+                                    respondents = respRes.data.map(function(r) { return r.user_id; });
+                                }
                             } catch (_) {}
+
+                            html += '<div class="my-card" style="border-left-color:#ff6b35;">' +
+                                '<div class="title">' + (task.description || task.title || 'Без названия') +
+                                '</div>' +
+                                '<div class="sub">📍 ' + (task.location || task.place || 'Не указано') + '</div>' +
+                                '<div class="sub">📅 ' + dateFormatted + '</div>' +
+                                '<div class="sub">💰 ' + (task.salary ? task.salary + ' ₽' : 'Не указана') +
+                                '</div>' +
+                                '<div class="respondents">👥 Откликнулось: ' + (respondents.length > 0 ? respondents
+                                    .join(', ') : 'никого') + '</div>' +
+                                '</div>';
                         }
-                        html += '<div class="my-card">' +
-                            '<div class="title">' + (task.description || task.title || 'Без названия') +
-                            '</div>' +
-                            '<div class="sub">📍 ' + (task.location || task.place || 'Не указано') + '</div>' +
-                            '<div class="sub">📅 ' + dateFormatted + '</div>' +
-                            '<div class="sub">💰 ' + (task.salary ? task.salary + ' ₽' : 'Не указана') +
-                            '</div>' +
-                            '</div>';
-                    });
+                    }
+
+                    // Мои отклики
+                    if (respondedTasks.length > 0) {
+                        html += '<h4 style="margin:12px 0 8px;color:#4caf50;">✅ Мои отклики</h4>';
+                        for (var j = 0; j < respondedTasks.length; j++) {
+                            var t = respondedTasks[j];
+                            var dateFormatted2 = t.date || 'Не указана';
+                            if (t.date) {
+                                try {
+                                    var d2 = new Date(t.date);
+                                    dateFormatted2 = d2.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long',
+                                        year: 'numeric' });
+                                } catch (_) {}
+                            }
+                            html += '<div class="my-card">' +
+                                '<div class="title">' + (t.description || t.title || 'Без названия') +
+                                '</div>' +
+                                '<div class="sub">📍 ' + (t.location || t.place || 'Не указано') + '</div>' +
+                                '<div class="sub">📅 ' + dateFormatted2 + '</div>' +
+                                '<div class="sub">💰 ' + (t.salary ? t.salary + ' ₽' : 'Не указана') +
+                                '</div>' +
+                                '</div>';
+                        }
+                    }
 
                     container.innerHTML = html;
 
