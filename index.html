@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Смены и подработки</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f0f2f5;
+            color: #1a1a2e;
+            padding-bottom: 40px;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 24px 20px 20px;
+            border-radius: 0 0 24px 24px;
+            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+        }
+        .header h1 {
+            font-size: 22px;
+            font-weight: 700;
+        }
+        .header p {
+            font-size: 14px;
+            opacity: 0.85;
+        }
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 16px;
+        }
+        .status {
+            background: white;
+            padding: 12px 16px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            font-size: 14px;
+            color: #555;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+        }
+        .task-card {
+            background: white;
+            border-radius: 16px;
+            padding: 18px;
+            margin-bottom: 14px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+            border-left: 4px solid #667eea;
+        }
+        .task-card .task-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .task-card .info {
+            font-size: 14px;
+            color: #666;
+            margin: 4px 0;
+        }
+        .task-card .salary {
+            font-size: 20px;
+            font-weight: 700;
+            color: #2e7d32;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #f0f0f0;
+        }
+        .respond-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            width: 100%;
+            cursor: pointer;
+            margin-top: 12px;
+            transition: all 0.3s;
+        }
+        .respond-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+        }
+        .respond-btn:disabled {
+            background: #4caf50;
+            cursor: default;
+            transform: none;
+            box-shadow: none;
+        }
+        .empty {
+            background: white;
+            padding: 40px 20px;
+            border-radius: 16px;
+            text-align: center;
+            color: #999;
+        }
+        .error {
+            background: #fff5f5;
+            color: #c62828;
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid #ffcdd2;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+        .header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="container" style="padding: 0;">
+            <div class="header-row">
+                <div>
+                    <h1>📋 Смены</h1>
+                    <p>Подработки и вакансии</p>
+                </div>
+                <div class="user-avatar">👤</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div id="status" class="status">⏳ Загрузка...</div>
+        <div id="tasks">
+            <div class="loading">Загрузка смен...</div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            'use strict';
+
+            // ======= Telegram =======
+            var userId = 'test_user_' + Math.floor(Math.random() * 1000000);
+            if (window.Telegram && window.Telegram.WebApp) {
+                var tg = window.Telegram.WebApp;
+                tg.ready();
+                if (tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.id) {
+                    userId = String(tg.initDataUnsafe.user.id);
+                }
+            }
+
+            // ======= Supabase =======
+            var supabaseUrl = 'https://azxfbrmrnhckfbhghjqr1.supabase.co';
+            var supabaseKey = 'sb_publishable_WmfBKKQcW6ioUJA33Dgt0w_D6IJ5CQg';
+            var supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+            // ======= Загрузка =======
+            async function loadTasks() {
+                var container = document.getElementById('tasks');
+                var status = document.getElementById('status');
+                status.innerHTML = '⏳ Загрузка данных...';
+
+                try {
+                    var result = await supabase.from('tasks').select('*').order('id', { ascending: false });
+                    if (result.error) {
+                        container.innerHTML = '<div class="error">❌ Ошибка: ' + result.error.message + '</div>';
+                        status.innerHTML = '❌ Ошибка подключения';
+                        return;
+                    }
+                    var data = result.data;
+                    if (!data || data.length === 0) {
+                        container.innerHTML = '<div class="empty">📭 Сейчас доступных смен нет</div>';
+                        status.innerHTML = '✅ Подключено. Смен нет';
+                        return;
+                    }
+
+                    var responded = new Set();
+                    try {
+                        var respResult = await supabase.from('responses').select('task_id').eq('user_id', userId);
+                        if (respResult.data) {
+                            respResult.data.forEach(function(r) { responded.add(r.task_id); });
+                        }
+                    } catch (_) {}
+
+                    var html = '';
+                    data.forEach(function(task) {
+                        var isResponded = responded.has(task.id);
+                        var dateFormatted = task.date || 'Не указана';
+                        if (task.date) {
+                            try {
+                                var d = new Date(task.date);
+                                dateFormatted = d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long',
+                                    year: 'numeric' });
+                            } catch (_) {}
+                        }
+                        html += '<div class="task-card">' +
+                            '<div class="task-title">' + (task.description || task.title || 'Без названия') +
+                            '</div>' +
+                            '<div class="info">📍 ' + (task.location || task.place || 'Не указано') + '</div>' +
+                            '<div class="info">📅 ' + dateFormatted + '</div>' +
+                            '<div class="info">⏰ ' + (task.time || 'Не указано') + '</div>' +
+                            '<div class="salary">' + (task.salary ? task.salary + ' ₽' : 'Не указана') + '</div>' +
+                            '<button class="respond-btn" data-id="' + task.id + '"' + (isResponded ? ' disabled' :
+                                '') + '>' +
+                            (isResponded ? '✅ Откликнулись' : 'Откликнуться') +
+                            '</button>' +
+                            '</div>';
+                    });
+
+                    container.innerHTML = html;
+
+                    document.querySelectorAll('.respond-btn:not([disabled])').forEach(function(btn) {
+                        btn.addEventListener('click', async function() {
+                            var taskId = this.dataset.id;
+                            var originalText = this.textContent;
+                            this.textContent = '⏳ Отправка...';
+                            this.disabled = true;
+                            try {
+                                var insResult = await supabase.from('responses').insert([{ task_id: parseInt(
+                                        taskId), user_id: userId }]);
+                                if (insResult.error) {
+                                    alert('❌ Ошибка: ' + insResult.error.message);
+                                    this.textContent = originalText;
+                                    this.disabled = false;
+                                } else {
+                                    this.textContent = '✅ Откликнулись';
+                                    this.style.background = '#4caf50';
+                                    if (window.Telegram && window.Telegram.WebApp) {
+                                        window.Telegram.WebApp.showAlert('✅ Вы откликнулись на смену!');
+                                    } else {
+                                        alert('✅ Вы откликнулись на смену!');
+                                    }
+                                }
+                            } catch (err) {
+                                alert('❌ Ошибка: ' + err.message);
+                                this.textContent = originalText;
+                                this.disabled = false;
+                            }
+                        });
+                    });
+
+                    status.innerHTML = '✅ Подключено. ' + data.length + ' смен';
+                } catch (err) {
+                    container.innerHTML = '<div class="error">❌ Ошибка: ' + err.message + '</div>';
+                    status.innerHTML = '❌ Ошибка';
+                }
+            }
+
+            loadTasks();
+        })();
+    </script>
+
+</body>
+</html>
